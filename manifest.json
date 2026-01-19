@@ -1,7 +1,7 @@
 {
   "name": "Vokabel Profi",
   "short_name": "Vokabeln",
-  "description": "Lerne Englisch auf deinem Pixel",
+  "description": "Dein neuer Vokabeltrainer",
   "id": "/Vokabel-Profi/",
   "start_url": "./index.html",
   "scope": "./",
