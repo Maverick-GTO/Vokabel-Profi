@@ -4,198 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vokabel-Profi</title>
-    
     <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/512/ffffff/abc-block.png">
     <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/512/ffffff/abc-block.png">
     <meta name="theme-color" content="#121212">
     <link rel="manifest" href="manifest.json">
-
     <style>
-        :root {
-            --bg: #121212; --surface: #1E1E1E; --primary: #8AB4F8; 
-            --on-primary: #003063; --text: #E2E2E2; --sub: #909090;
-            --danger: #F28B82; --success: #81C995; --border: #333333;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Roboto', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 16px; min-height: 100vh; }
-        .screen { background: var(--surface); padding: 24px; border-radius: 28px; max-width: 500px; margin: 10px auto; width: 100%; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-        h1 { font-size: 26px; text-align: center; color: var(--primary); margin-bottom: 24px; font-weight: 300; }
-        h2 { font-size: 18px; color: var(--primary); margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        button { width: 100%; padding: 14px; margin: 6px 0; border-radius: 100px; border: none; font-size: 16px; font-weight: 500; cursor: pointer; transition: 0.1s; }
-        .btn-p { background-color: var(--primary); color: var(--on-primary); }
-        .btn-o { background-color: transparent; border: 1px solid var(--sub); color: var(--text); }
-        .btn-d { background: none; border: 1px solid var(--danger); color: var(--danger); padding: 6px 12px; font-size: 12px; width: auto; }
-        input, select { width: 100%; background: #2C2C2C; border: 1px solid #444; border-radius: 12px; padding: 12px; color: white; margin-bottom: 12px; font-size: 16px; outline: none; }
-        .hidden { display: none !important; }
-        .word-row { background: #252525; padding: 12px; border-radius: 16px; margin-bottom: 12px; border: 1px solid #333; }
-        .lektion-card { background: #252525; padding: 16px; border-radius: 16px; margin-bottom: 12px; border-left: 4px solid var(--primary); cursor: pointer; }
-        .game-card { text-align: center; padding: 20px 10px; }
-        .prompt { font-size: 32px; margin-bottom: 20px; font-weight: bold; }
-        .missing { font-size: 34px; letter-spacing: 6px; color: var(--primary); font-family: monospace; }
-        .stars { font-size: 60px; margin: 20px 0; animation: bounce 1s infinite alternate; }
-        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
+        :root { --bg: #121212; --surf: #1E1E1E; --prim: #8AB4F8; --text: #E2E2E2; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .screen { background: var(--surf); padding: 25px; border-radius: 25px; max-width: 500px; margin: auto; }
+        .hidden { display: none; }
+        button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 50px; border: none; background: var(--prim); color: #003063; font-weight: bold; cursor: pointer; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #444; background: #2C2C2C; color: white; }
     </style>
 </head>
 <body>
-
     <div id="home" class="screen">
         <h1>Vokabel-Profi</h1>
-        <button class="btn-p" onclick="showScreen('selectLek')">Lektion wählen</button>
-        <button class="btn-o" onclick="showScreen('createLek')">Lektion erfassen</button>
-        <button class="btn-o" onclick="showScreen('manageLek')">Vokabeln korrigieren</button>
-        <div style="margin-top:20px; display:flex; gap:10px;">
-            <button class="btn-o" style="font-size:10px;" onclick="exportData()">Backup</button>
-            <button class="btn-o" style="font-size:10px;" onclick="importData()">Restore</button>
-        </div>
+        <button onclick="showScreen('add')">Vokabeln erfassen</button>
+        <button onclick="showScreen('list')">Lektionen lernen</button>
     </div>
 
-    <div id="createLek" class="screen hidden">
+    <div id="add" class="screen hidden">
         <h2>Neue Lektion</h2>
-        <input type="text" id="lekThema" placeholder="Thema">
-        <input type="text" id="lekSeite" placeholder="Seite">
-        <div id="wordInputs"></div>
-        <button class="btn-o" onclick="addWordField()">+ Wort</button>
-        <button class="btn-p" onclick="saveLek()">Speichern</button>
-        <button class="btn-o" onclick="showScreen('home')">Abbrechen</button>
-    </div>
-
-    <div id="selectLek" class="screen hidden">
-        <h2>Übung wählen</h2>
-        <div id="lekListe"></div>
-        <button class="btn-o" onclick="showScreen('home')">Zurück</button>
-    </div>
-
-    <div id="gameMode" class="screen hidden">
-        <h2 id="gameTitle">Modus</h2>
-        <button class="btn-p" onclick="startQuiz('en-de')">EN ➔ DE</button>
-        <button class="btn-p" onclick="startQuiz('de-en')">DE ➔ EN</button>
-        <button class="btn-p" onclick="startQuiz('miss')">Buchstaben</button>
-        <button class="btn-o" onclick="showScreen('selectLek')">Zurück</button>
-    </div>
-
-    <div id="quiz" class="screen hidden">
-        <div class="game-card">
-            <div class="prompt" id="qPrompt"></div>
-            <div id="qMiss" class="missing hidden"></div>
-            <p id="qHint" style="color:var(--sub)"></p>
-            <input type="text" id="qInput" placeholder="Antwort..." autocomplete="off" onkeydown="if(event.key==='Enter') check()">
-            <button class="btn-p" onclick="check()">Prüfen</button>
-            <div id="qFeed" style="margin-top:15px; font-weight:bold;"></div>
+        <input type="text" id="thema" placeholder="Thema">
+        <div id="words">
+            <input type="text" class="en" placeholder="Englisch">
+            <input type="text" class="de" placeholder="Deutsch">
         </div>
+        <button onclick="save()">Speichern</button>
+        <button onclick="showScreen('home')" style="background:none; color:white;">Abbrechen</button>
     </div>
 
-    <div id="success" class="screen hidden">
-        <div class="stars">🌟🌟🌟</div>
-        <h2>Super gemacht!</h2>
-        <button class="btn-p" onclick="showScreen('home')">Weiter</button>
-    </div>
-
-    <div id="manageLek" class="screen hidden">
-        <h2>Korrektur</h2>
-        <div id="manListe"></div>
-        <button class="btn-o" onclick="showScreen('home')">Zurück</button>
+    <div id="list" class="screen hidden">
+        <h2>Deine Lektionen</h2>
+        <div id="lekListe"></div>
+        <button onclick="showScreen('home')">Zurück</button>
     </div>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('vokabel_profi_db')) || [];
-        let curL, curW, curI, curM, mO;
+        let db = JSON.parse(localStorage.getItem('vp_db')) || [];
 
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-            if(id === 'selectLek') renderLek();
-            if(id === 'manageLek') renderMan();
-            if(id === 'createLek') { document.getElementById('wordInputs').innerHTML=''; addWordField(); }
+            if(id === 'list') render();
         }
 
-        function addWordField() {
-            const d = document.createElement('div'); d.className='word-row';
-            d.innerHTML = `<input type="text" class="enI" placeholder="EN"><input type="text" class="deI" placeholder="DE">
-                <select class="tyI"><option>Nomen</option><option>Verb</option><option>Adjektiv</option><option>Adverb</option><option>Andere</option></select>`;
-            document.getElementById('wordInputs').appendChild(d);
+        function save() {
+            const t = document.getElementById('thema').value;
+            const en = document.querySelector('.en').value;
+            const de = document.querySelector('.de').value;
+            if(!t || !en || !de) return alert("Alles ausfüllen!");
+            db.push({ t, en, de });
+            localStorage.setItem('vp_db', JSON.stringify(db));
+            showScreen('home');
         }
 
-        function saveLek() {
-            const t = document.getElementById('lekThema').value;
-            const words = Array.from(document.querySelectorAll('.word-row')).map(r => ({
-                en: r.querySelector('.enI').value.trim(),
-                de: r.querySelector('.deI').value.trim(),
-                ty: r.querySelector('.tyI').value
-            })).filter(w => w.en && w.de);
-            if(!t || !words.length) return alert("Thema und Wörter fehlen!");
-            db.unshift({ id: Date.now(), t, s: document.getElementById('lekSeite').value, w: words });
-            save(); showScreen('home');
-        }
-
-        function renderLek() {
-            document.getElementById('lekListe').innerHTML = db.map(l => `<div class="lektion-card" onclick="selL(${l.id})"><strong>${l.t}</strong><br><small>${l.w.length} Wörter</small></div>`).join('') || "Leer.";
-        }
-
-        function selL(id) { curL = db.find(l => l.id === id); document.getElementById('gameTitle').innerText = curL.t; showScreen('gameMode'); }
-
-        function startQuiz(m) {
-            curM = m; curW = [...curL.w].sort(() => Math.random() - 0.5); curI = 0;
-            showScreen('quiz'); next();
-        }
-
-        function next() {
-            if(curI >= curW.length) return showScreen('success');
-            const w = curW[curI]; const inp = document.getElementById('qInput'); const mis = document.getElementById('qMiss');
-            document.getElementById('qFeed').innerText = ''; inp.value = '';
-            inp.classList.remove('hidden'); mis.classList.add('hidden');
-            if(curM === 'en-de') { document.getElementById('qPrompt').innerText = w.en; }
-            else if(curM === 'de-en') { document.getElementById('qPrompt').innerText = w.de; }
-            else {
-                mis.classList.remove('hidden'); document.getElementById('qPrompt').innerText = '';
-                document.getElementById('qHint').innerText = "DE: " + w.de; mO = w.en;
-                let s = w.en, idx = [], c = s.length > 5 ? 3 : 2;
-                while(idx.length < c) { let r = Math.floor(Math.random()*s.length); if(!idx.includes(r) && s[r]!==' ') idx.push(r); }
-                mis.innerText = s.split('').map((char, i) => idx.includes(i) ? '_' : char).join('');
-            }
-            setTimeout(() => inp.focus(), 150);
-        }
-
-        function check() {
-            const w = curW[curI], v = document.getElementById('qInput').value.trim().toLowerCase();
-            const correct = (curM==='miss' ? mO : (curM==='en-de' ? w.de : w.en)).toLowerCase();
-            if(v === correct) {
-                document.getElementById('qFeed').innerText = "Richtig! 🌟"; document.getElementById('qFeed').style.color = "var(--success)";
-                setTimeout(() => { curI++; next(); }, 1000);
-            } else {
-                document.getElementById('qFeed').innerText = "Falsch!"; document.getElementById('qFeed').style.color = "var(--danger)";
-            }
-        }
-
-        function renderMan() {
-            document.getElementById('manListe').innerHTML = db.map((l, i) => `<div class="lektion-card" style="cursor:default">
-                <div style="display:flex; justify-content:space-between;"><strong>${l.t}</strong><button class="btn-d" onclick="delL(${i})">Löschen</button></div>
-                ${l.w.map((w, wi) => `<div style="display:flex; justify-content:space-between; padding:5px 0; border-top:1px solid #333;"><span>${w.en} - ${w.de}</span><button class="btn-d" onclick="delW(${i},${wi})">X</button></div>`).join('')}
-            </div>`).join('') || "Leer.";
-        }
-
-        function delL(i) { if(confirm("Löschen?")) { db.splice(i, 1); save(); renderMan(); } }
-        function delW(li, wi) { db[li].w.splice(wi, 1); save(); renderMan(); }
-        function save() { localStorage.setItem('vokabel_profi_db', JSON.stringify(db)); }
-        
-        function exportData() {
-            const blob = new Blob([JSON.stringify(db)], {type: 'application/json'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vokabel_backup.json'; a.click();
-        }
-
-        function importData() {
-            const inp = document.createElement('input'); inp.type = 'file';
-            inp.onchange = e => {
-                const reader = new FileReader();
-                reader.onload = ev => { db = JSON.parse(ev.target.result); save(); location.reload(); };
-                reader.readAsText(e.target.files[0]);
-            };
-            inp.click();
+        function render() {
+            document.getElementById('lekListe').innerHTML = db.map(l => `<div style="padding:10px; border-bottom:1px solid #333;">${l.t}: ${l.en} = ${l.de}</div>`).join('') || "Keine Wörter.";
         }
 
         if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js', { scope: './' })
-        .then(reg => console.log('PWA bereit:', reg.scope))
-        .catch(err => console.error('PWA Fehler:', err));
-    });
-}
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js', { scope: './' });
+            });
+        }
+    </script>
+</body>
+</html>
